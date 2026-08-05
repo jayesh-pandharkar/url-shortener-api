@@ -1,4 +1,4 @@
-package com.jay.url_shortener;
+package com.jay.urlshortener;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
