@@ -16,4 +16,4 @@ A production-ready URL Shortener REST API built with Spring Boot.
 - ✅ Project initialized
 - ✅ PostgreSQL configured
 - ✅ GitHub repository created
-- ✅ User Authentication (In Progress)
+- ✅ User Authentication
