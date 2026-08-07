@@ -1,7 +1,10 @@
 package com.jay.urlshortener.service;
 
-import com.jay.urlshortener.entity.User;
+import com.jay.urlshortener.dto.RegisterRequest;
+import com.jay.urlshortener.dto.UserResponse;
 
 public interface UserService {
-    User register(User user);
+
+    UserResponse register(RegisterRequest request);
+
 }

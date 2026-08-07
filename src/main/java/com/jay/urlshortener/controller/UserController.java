@@ -1,6 +1,7 @@
 package com.jay.urlshortener.controller;
 
-import com.jay.urlshortener.entity.User;
+import com.jay.urlshortener.dto.RegisterRequest;
+import com.jay.urlshortener.dto.UserResponse;
 import com.jay.urlshortener.service.UserService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,8 +17,8 @@ public class UserController {
         this.userService = userService;
     }
     @PostMapping("/register")
-   public User register(@RequestBody User user) {
-       return userService.register(user);
+   public UserResponse register(@RequestBody RegisterRequest request) {
+       return userService.register(request);
    }
 
 }
