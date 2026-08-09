@@ -1,14 +1,12 @@
 package com.jay.urlshortener.dto;
 
 import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDateTime;
 
-public record CreateShortUrlRequest(
+public record UpdateShortUrlRequest(
 
-        @NotBlank(message = "Original URL is required")
         @Pattern(
                 regexp = "^(https?://).+",
                 message = "URL must start with http:// or https://"

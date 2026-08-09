@@ -30,6 +30,7 @@ public class SecurityConfig {
                                 "/api/users/register",
                                 "/api/auth/login"
                         ).permitAll()
+                        .requestMatchers("/{shortCode}").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

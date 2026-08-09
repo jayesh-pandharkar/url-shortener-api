@@ -49,7 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         User user = userRepository.findByUsername(username)
                 .orElse(null);
 
-        if (user != null && jwtService.isTokenValid(token, username)) {
+        if (user == null) {
+            System.out.println("JWT DEBUG: user not found: " + username);
+        } else if (!jwtService.isTokenValid(token, username)) {
+            System.out.println("JWT DEBUG: token validation failed for: " + username);
+        } else {
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
@@ -60,6 +64,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext()
                     .setAuthentication(authentication);
+
+            System.out.println("JWT DEBUG: authentication successful for: " + username);
         }
 
         filterChain.doFilter(request, response);
