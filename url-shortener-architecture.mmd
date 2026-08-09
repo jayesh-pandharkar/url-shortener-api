@@ -1,0 +1,60 @@
+flowchart TB
+    Client["Client / Postman / Swagger UI"]
+
+    subgraph Security["Security Layer"]
+        JWT["JWT Authentication"]
+        SpringSecurity["Spring Security"]
+    end
+
+    subgraph API["Spring Boot REST API"]
+        AuthController["Auth Controller"]
+        UserController["User Controller"]
+        ShortUrlController["Short URL Controller"]
+    end
+
+    subgraph Business["Service Layer"]
+        AuthService["Auth Service"]
+        UserService["User Service"]
+        ShortUrlService["Short URL Service"]
+        JwtService["JWT Service"]
+    end
+
+    subgraph Persistence["Persistence Layer"]
+        UserRepository["User Repository"]
+        ShortUrlRepository["Short URL Repository"]
+        Hibernate["Hibernate / JPA"]
+    end
+
+    DB[("PostgreSQL")]
+
+    subgraph DevOps["Deployment & Infrastructure"]
+        Docker["Docker"]
+        Compose["Docker Compose"]
+        Railway["Railway"]
+    end
+
+    Client --> SpringSecurity
+    SpringSecurity --> JWT
+    JWT --> AuthController
+    SpringSecurity --> AuthController
+    SpringSecurity --> UserController
+    SpringSecurity --> ShortUrlController
+
+    AuthController --> AuthService
+    UserController --> UserService
+    ShortUrlController --> ShortUrlService
+
+    AuthService --> JwtService
+    AuthService --> UserRepository
+    UserService --> UserRepository
+    ShortUrlService --> ShortUrlRepository
+
+    UserRepository --> Hibernate
+    ShortUrlRepository --> Hibernate
+    Hibernate --> DB
+
+    Docker --> Compose
+    Compose --> DB
+    Compose --> API
+    API --> Railway
+    DB --> Railway
