@@ -30,7 +30,10 @@ public class SecurityConfig {
                                 "/",
                                 "/error",
                                 "/api/users/register",
-                                "/api/auth/login"
+                                "/api/auth/login",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/{shortCode}").permitAll()
                         .anyRequest().authenticated()

@@ -11,6 +11,10 @@ import com.jay.urlshortener.service.ShortUrlService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.jay.urlshortener.exception.ShortUrlExpiredException;
+import com.jay.urlshortener.exception.ShortUrlNotFoundException;
+import com.jay.urlshortener.exception.UnauthorizedUrlAccessException;
+import com.jay.urlshortener.exception.UserNotFoundException;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -48,7 +52,7 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new RuntimeException("User not found")
+                        new UserNotFoundException("User not found")
                 );
 
         String shortCode = generateUniqueShortCode();
@@ -103,12 +107,12 @@ public class ShortUrlServiceImpl implements ShortUrlService {
 
         ShortUrl shortUrl = shortUrlRepository
                 .findByShortCode(shortCode)
-                .orElseThrow(() -> new RuntimeException("Short URL not found"));
+                .orElseThrow(() -> new ShortUrlNotFoundException("Short URL not found"));
 
         if (shortUrl.getExpiresAt() != null &&
                 shortUrl.getExpiresAt().isBefore(LocalDateTime.now())) {
 
-            throw new RuntimeException("Short URL has expired");
+            throw new ShortUrlExpiredException("Short URL has expired");
         }
 
         shortUrl.setClickCount(shortUrl.getClickCount() + 1);
@@ -140,11 +144,11 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         ShortUrl shortUrl = shortUrlRepository
                 .findByShortCode(shortCode)
                 .orElseThrow(() ->
-                        new RuntimeException("Short URL not found")
+                        new ShortUrlNotFoundException("Short URL not found")
                 );
 
         if (!shortUrl.getUser().getUsername().equals(username)) {
-            throw new RuntimeException(
+            throw new UnauthorizedUrlAccessException(
                     "You are not allowed to delete this URL"
             );
         }
@@ -162,11 +166,11 @@ public class ShortUrlServiceImpl implements ShortUrlService {
         ShortUrl shortUrl = shortUrlRepository
                 .findByShortCode(shortCode)
                 .orElseThrow(() ->
-                        new RuntimeException("Short URL not found")
+                        new ShortUrlNotFoundException("Short URL not found")
                 );
 
         if (!shortUrl.getUser().getUsername().equals(username)) {
-            throw new RuntimeException(
+            throw new UnauthorizedUrlAccessException(
                     "You are not allowed to update this URL"
             );
         }

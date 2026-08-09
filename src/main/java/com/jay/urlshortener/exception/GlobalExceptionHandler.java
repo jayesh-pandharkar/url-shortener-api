@@ -1,35 +1,70 @@
 package com.jay.urlshortener.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
+    @ExceptionHandler(ShortUrlNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleShortUrlNotFound(
+            ShortUrlNotFoundException ex) {
 
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
-
-        return errors;
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        404,
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
     }
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+    @ExceptionHandler(ShortUrlExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleShortUrlExpired(
+            ShortUrlExpiredException ex) {
 
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-
-        return error;
+        return ResponseEntity
+                .status(HttpStatus.GONE)
+                .body(new ErrorResponse(
+                        410,
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
     }
+
+    @ExceptionHandler(UnauthorizedUrlAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedAccess(
+            UnauthorizedUrlAccessException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(
+                        403,
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(
+            UserNotFoundException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(
+                        404,
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
+    }
+
+    public record ErrorResponse(
+            int status,
+            String message,
+            LocalDateTime timestamp
+    ) {}
 }
