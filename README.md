@@ -1,804 +1,401 @@
 # 🔗 URL Shortener API
 
-A production-oriented RESTful URL Shortener API built with Java and Spring Boot.
+A production-oriented URL Shortener REST API built with **Java, Spring Boot, Spring Security, JWT, PostgreSQL, JPA/Hibernate, Docker, Docker Compose, and Swagger/OpenAPI**.
 
-The application allows authenticated users to create, manage, and track shortened URLs. It uses JWT-based authentication, PostgreSQL for persistence, Spring Data JPA/Hibernate for database access, Docker/Docker Compose for containerized development, Swagger/OpenAPI for interactive API documentation, and Railway for cloud deployment.
+The application allows authenticated users to create, manage, and track shortened URLs while providing public short-code redirection.
 
----
+## 🌐 Live Demo
 
-## 🚀 Live Deployment
+**Live API:**  
+https://url-shortener-api-production-91e8.up.railway.app/
 
-### Production API
+**Swagger UI:**  
+https://url-shortener-api-production-91e8.up.railway.app/swagger-ui/index.html
 
-https://url-shortener-api-production-91e8.up.railway.app
-
-> The root URL does not represent a web frontend. This project is a REST API, so individual API endpoints should be accessed using HTTP methods such as GET, POST, PUT, and DELETE.
-
-### Example Short URL
-
-https://url-shortener-api-production-91e8.up.railway.app/{shortCode}
-
----
-
-## 📌 Project Overview
-
-Traditional URLs can be long and difficult to share.
-
-This project provides a backend service that converts long URLs into compact short codes.
-
-Example:
-
-```text
-Original URL:
-https://github.com/
-
-        ↓
-
-Short URL:
+**Example short URL:**  
 https://url-shortener-api-production-91e8.up.railway.app/BmdLTM
-```
 
-When a user accesses the short URL, the application:
-
-1. Receives the short code.
-2. Searches for the corresponding URL in PostgreSQL.
-3. Validates that the URL exists.
-4. Increments the click counter.
-5. Redirects the user to the original URL.
+> The root URL provides a small live landing page for the API. The actual application functionality is demonstrated through the REST endpoints and Swagger UI.
 
 ---
 
 ## ✨ Features
 
-### Authentication
-
-- User registration
-- User login
-- JWT-based authentication
-- Stateless authentication
-- Protected REST endpoints
-- Bearer token authorization
-
-### URL Management
-
+- User registration and authentication
+- JWT-based stateless authentication
+- Spring Security protected endpoints
 - Create shortened URLs
-- Generate unique short codes
-- Redirect short URLs to original URLs
+- Redirect using short codes
 - Retrieve URLs belonging to the authenticated user
 - Update shortened URLs
 - Delete shortened URLs
-- Track URL click counts
-- Store URL creation timestamps
-
-### Backend Engineering
-
-- RESTful API design
-- Layered architecture
-- Controller-Service-Repository pattern
-- DTO-based request handling
-- Request validation
-- Global error handling
+- Click-count tracking
+- Optional URL expiration support
+- User ownership validation
+- Input validation
+- Centralized global exception handling
+- Meaningful HTTP status codes and error responses
 - PostgreSQL persistence
 - JPA/Hibernate ORM
-- JWT security
-- Swagger/OpenAPI documentation
-
-### DevOps
-
+- Swagger/OpenAPI API documentation
 - Docker containerization
-- Docker Compose
-- PostgreSQL container
-- Environment-based configuration
-- Railway cloud deployment
+- Docker Compose setup for application + PostgreSQL
+- Production deployment on Railway
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ System Architecture
+
+```mermaid
+flowchart TB
+    Client["Client / Postman / Swagger UI"]
+
+    subgraph Security["Security Layer"]
+        JWT["JWT Authentication"]
+        SpringSecurity["Spring Security"]
+    end
+
+    subgraph API["Spring Boot REST API"]
+        AuthController["Auth Controller"]
+        UserController["User Controller"]
+        ShortUrlController["Short URL Controller"]
+    end
+
+    subgraph Business["Service Layer"]
+        AuthService["Auth Service"]
+        UserService["User Service"]
+        ShortUrlService["Short URL Service"]
+        JwtService["JWT Service"]
+    end
+
+    subgraph Persistence["Persistence Layer"]
+        UserRepository["User Repository"]
+        ShortUrlRepository["Short URL Repository"]
+        Hibernate["Hibernate / JPA"]
+    end
+
+    DB[("PostgreSQL")]
+
+    Client --> SpringSecurity
+    SpringSecurity --> JWT
+    SpringSecurity --> AuthController
+    SpringSecurity --> UserController
+    SpringSecurity --> ShortUrlController
+
+    AuthController --> AuthService
+    UserController --> UserService
+    ShortUrlController --> ShortUrlService
+
+    AuthService --> JwtService
+    AuthService --> UserRepository
+    UserService --> UserRepository
+    ShortUrlService --> ShortUrlRepository
+
+    UserRepository --> Hibernate
+    ShortUrlRepository --> Hibernate
+    Hibernate --> DB
+```
+
+The Mermaid source is also available in:
+
+`url-shortener-architecture.mmd`
+
+---
+
+## 🛠️ Technology Stack
 
 | Technology | Purpose |
 |---|---|
-| Java | Backend programming language |
-| Spring Boot | REST API framework |
-| Spring Web | HTTP/REST API development |
+| Java | Application development |
+| Spring Boot | REST API and application framework |
 | Spring Security | Authentication and authorization |
 | JWT | Stateless authentication |
-| Spring Data JPA | Database abstraction |
+| Spring Data JPA | Data access |
 | Hibernate | ORM |
 | PostgreSQL | Relational database |
-| Maven | Build and dependency management |
+| Maven | Dependency management and build |
+| Swagger / OpenAPI | API documentation |
 | Docker | Application containerization |
-| Docker Compose | Multi-container local environment |
-| Swagger / OpenAPI | Interactive API documentation |
+| Docker Compose | Local multi-container environment |
+| Railway | Production deployment |
 | Postman | API testing |
-| Railway | Cloud deployment |
-| Git / GitHub | Version control |
 
 ---
 
-## 🏗️ Architecture
-
-The application follows a layered backend architecture.
-
-```text
-                    Client
-                      |
-                      | HTTP Request
-                      v
-              +-------------------+
-              |    Controller     |
-              +-------------------+
-                      |
-                      v
-              +-------------------+
-              |     Service       |
-              +-------------------+
-                      |
-                      v
-              +-------------------+
-              |    Repository     |
-              +-------------------+
-                      |
-                      v
-              +-------------------+
-              |    PostgreSQL     |
-              +-------------------+
-```
-
-### Main Layers
-
-#### Controller Layer
-
-Responsible for:
-
-- Receiving HTTP requests
-- Validating request input
-- Returning HTTP responses
-- Mapping API endpoints
-
-#### Service Layer
-
-Responsible for:
-
-- Business logic
-- URL generation
-- Authentication logic
-- Ownership checks
-- Click tracking
-- Coordinating repository operations
-
-#### Repository Layer
-
-Responsible for:
-
-- Database interaction
-- CRUD operations
-- Querying URL and user records
-
-#### Security Layer
-
-Responsible for:
-
-- JWT generation
-- JWT validation
-- Authentication
-- Authorization
-- Protecting secured endpoints
-
----
-
-## 🔐 Authentication Architecture
+## 🔐 Authentication Flow
 
 The application uses JWT-based stateless authentication.
 
 ```text
-                User
-                  |
-                  | Register
-                  v
-       POST /api/users/register
-                  |
-                  v
-             User stored
-                  |
-                  | Login
-                  v
-          POST /api/auth/login
-                  |
-                  v
-             JWT Token
-                  |
-                  v
-       Authorization: Bearer <JWT>
-                  |
-                  v
-          Protected APIs
-```
-
-The server does not need to maintain a traditional server-side session for authenticated users.
-
----
-
-## 🔗 URL Shortening Flow
-
-```text
-Client
-  |
-  | POST /api/urls
-  | { "originalUrl": "https://github.com" }
-  |
-  v
-ShortUrlController
-  |
-  v
-ShortUrlService
-  |
-  | Generate unique short code
-  |
-  v
-ShortUrlRepository
-  |
-  v
-PostgreSQL
-  |
-  v
-Short URL response
-```
-
-Example response:
-
-```json
-{
-  "id": 1,
-  "originalUrl": "https://github.com",
-  "shortCode": "BmdLTM",
-  "shortUrl": "http://localhost:8080/BmdLTM",
-  "clickCount": 0,
-  "createdAt": "2026-08-09T13:47:49.136869389",
-  "expiresAt": null
-}
-```
-
----
-
-## 🔄 URL Redirection Flow
-
-When a user accesses:
-
-```text
-GET /BmdLTM
-```
-
-the application performs:
-
-```text
-GET /{shortCode}
-       |
-       v
-Find short code
-       |
-       v
-Check URL exists
-       |
-       v
-Increment click count
-       |
-       v
-HTTP Redirect
-       |
-       v
-Original URL
-```
-
-Example:
-
-```text
-https://url-shortener-api-production-91e8.up.railway.app/BmdLTM
-
-                    ↓
-
-https://github.com/
-```
-
----
-
-# 📚 REST API
-
-## Authentication Endpoints
-
-### Register User
-
-```http
+Register
+   ↓
 POST /api/users/register
-```
-
-Example request:
-
-```json
-{
-  "username": "alex1",
-  "password": "password123"
-}
-```
-
-### Login
-
-```http
+   ↓
+User created
+   ↓
+Login
+   ↓
 POST /api/auth/login
-```
-
-Example request:
-
-```json
-{
-  "username": "alex1",
-  "password": "password123"
-}
-```
-
-The login endpoint returns a JWT token.
-
-The token is supplied to protected endpoints using:
-
-```http
-Authorization: Bearer <JWT_TOKEN>
+   ↓
+JWT generated
+   ↓
+Client sends:
+Authorization: Bearer <JWT>
+   ↓
+Spring Security validates token
+   ↓
+Protected endpoint is accessed
 ```
 
 ---
 
-## URL Endpoints
+## 🔗 API Endpoints
 
-### Create Short URL
+### User
 
-```http
-POST /api/urls
-```
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/users/register` | Register a new user |
 
-Authentication: Required
+### Authentication
 
-Headers:
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/auth/login` | Authenticate user and obtain JWT |
 
-```http
-Authorization: Bearer <JWT_TOKEN>
-Content-Type: application/json
-```
+### Short URLs
 
-Request:
+| Method | Endpoint | Authentication | Description |
+|---|---|---|---|
+| POST | `/api/urls` | Required | Create a short URL |
+| GET | `/api/urls/my` | Required | Get URLs belonging to current user |
+| PUT | `/api/urls/{shortCode}` | Required | Update a short URL |
+| DELETE | `/api/urls/{shortCode}` | Required | Delete a short URL |
+| GET | `/{shortCode}` | Public | Redirect to the original URL |
 
-```json
-{
-  "originalUrl": "https://github.com/"
-}
-```
+For complete request/response schemas and interactive testing, use Swagger UI:
 
-Example response:
+https://url-shortener-api-production-91e8.up.railway.app/swagger-ui/index.html
 
-```json
-{
-  "id": 1,
-  "originalUrl": "https://github.com/",
-  "shortCode": "BmdLTM",
-  "shortUrl": "http://localhost:8080/BmdLTM",
-  "clickCount": 0,
-  "createdAt": "2026-08-09T13:47:49.136869389",
-  "expiresAt": null
-}
-```
+---
 
-### Redirect to Original URL
+## 🔄 How URL Shortening Works
 
-```http
-GET /{shortCode}
-```
+1. An authenticated client submits an original URL.
+2. The service generates a unique short code.
+3. The URL mapping is persisted in PostgreSQL.
+4. The generated short URL is returned to the client.
+5. A request to `/{shortCode}` looks up the mapping.
+6. The service validates the URL and expiration status.
+7. The click count is incremented.
+8. The client is redirected to the original URL.
 
 Example:
 
-```http
-GET /BmdLTM
-```
+```text
+Original:
+https://github.com
 
-The server resolves the short code and redirects the client to the original URL.
-
-### Get My URLs
-
-```http
-GET /api/urls/my
-```
-
-Authentication: Required
-
-Header:
-
-```http
-Authorization: Bearer <JWT_TOKEN>
-```
-
-Returns shortened URLs belonging to the authenticated user.
-
-### Update Short URL
-
-```http
-PUT /api/urls/{shortCode}
-```
-
-Authentication: Required
-
-Example:
-
-```http
-PUT /api/urls/BmdLTM
-```
-
-### Delete Short URL
-
-```http
-DELETE /api/urls/{shortCode}
-```
-
-Authentication: Required
-
-Example:
-
-```http
-DELETE /api/urls/BmdLTM
+Short:
+https://url-shortener-api-production-91e8.up.railway.app/BmdLTM
 ```
 
 ---
 
-# 📖 Swagger / OpenAPI
+## 🗄️ Database
 
-The project includes interactive API documentation using Swagger/OpenAPI.
+PostgreSQL is used as the primary relational database.
 
-After starting the application locally:
+JPA/Hibernate handles entity mapping and persistence.
 
-### Swagger UI
-
-http://localhost:8080/swagger-ui/index.html
-
-### OpenAPI JSON
-
-http://localhost:8080/v3/api-docs
-
-Swagger provides an interactive interface for:
-
-- Viewing available endpoints
-- Inspecting request/response models
-- Testing APIs
-- Supplying JWT authorization
-- Understanding API contracts
+The application stores user information and shortened URL mappings, including ownership, short codes, original URLs, click counts, timestamps, and expiration information where configured.
 
 ---
 
-# 🧪 API Testing
+## 🧱 Application Architecture
 
-The APIs were tested using both Postman and Swagger UI.
-
-Recommended testing workflow:
+The project follows a layered architecture:
 
 ```text
-1. Register user
-       ↓
-2. Login
-       ↓
-3. Copy JWT
-       ↓
-4. Authorize Swagger / Postman
-       ↓
-5. Create short URL
-       ↓
-6. Access short URL
-       ↓
-7. Verify redirect
-       ↓
-8. Check click count
-       ↓
-9. Update URL
-       ↓
-10. Delete URL
-```
-
----
-
-# 🐳 Docker
-
-The application is containerized using Docker.
-
-The Docker setup contains:
-
-```text
-+-----------------------------+
-|       Docker Compose        |
-+--------------+--------------+
-               |
-       +-------+-------+
-       |               |
-       v               v
-+-------------+   +-------------+
-| Spring Boot |   | PostgreSQL  |
-|     API     |   |  Database   |
-+-------------+   +-------------+
-       |               |
-       +-------+-------+
-               |
-          Docker Network
-```
-
----
-
-## 🐳 Run with Docker Compose
-
-### Prerequisites
-
-Install:
-
-- Docker Desktop
-- Git
-
-Verify Docker:
-
-```bash
-docker --version
-```
-
-Verify Docker Compose:
-
-```bash
-docker compose version
-```
-
-### Start the application
-
-From the project root:
-
-```bash
-docker compose up --build
-```
-
-The command starts:
-
-```text
-Spring Boot API
+Controller
+    ↓
+Service
+    ↓
+Repository
+    ↓
+JPA / Hibernate
+    ↓
 PostgreSQL
 ```
 
-The API is available at:
+### Controller Layer
 
-http://localhost:8080
+Handles HTTP requests, validation, and API responses.
 
-Swagger:
+### Service Layer
 
-http://localhost:8080/swagger-ui/index.html
+Contains business logic such as URL generation, authentication, ownership checks, and redirect processing.
 
-### Run in background
+### Repository Layer
 
-```bash
-docker compose up --build -d
-```
+Uses Spring Data JPA repositories for database operations.
 
-### View logs
+### Security Layer
 
-```bash
-docker compose logs -f
-```
+Spring Security and JWT protect authenticated endpoints.
 
-Application logs:
+### Exception Handling
 
-```bash
-docker compose logs -f api
-```
+Centralized exception handling provides consistent responses for conditions such as:
 
-### Stop containers
-
-```bash
-docker compose down
-```
-
-### Stop containers and remove database volume
-
-```bash
-docker compose down -v
-```
-
-> This removes the PostgreSQL Docker volume and therefore deletes the locally persisted database data.
+- User not found
+- Short URL not found
+- Expired short URL
+- Unauthorized URL access
+- Invalid requests
 
 ---
 
-# 💻 Run Locally Without Docker
+## 🐳 Docker
 
-## Prerequisites
+The project includes Docker support for reproducible local environments.
 
-- Java 25+
-- PostgreSQL
-- Git
-- Maven Wrapper
-
-Check Java:
-
-```bash
-java -version
-```
-
----
-
-## Database Configuration
-
-Create a PostgreSQL database:
-
-```text
-url_shortener
-```
-
-Configure the database connection in:
-
-```text
-src/main/resources/application.properties
-```
-
-Example:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/url_shortener
-spring.datasource.username=YOUR_USERNAME
-spring.datasource.password=YOUR_PASSWORD
-```
-
-> Do not commit production passwords, JWT secrets, or other credentials to Git.
-
----
-
-# ▶️ Run the Application
-
-Using Maven Wrapper:
-
-```bash
-./mvnw spring-boot:run
-```
-
-Or build the project:
-
-```bash
-./mvnw clean package
-```
-
-Then run the generated JAR:
-
-```bash
-java -jar target/<application-name>.jar
-```
-
----
-
-# 🧱 Build Docker Image Manually
-
-Build the application JAR:
-
-```bash
-./mvnw clean package -DskipTests
-```
-
-Build the Docker image:
+### Build the application image
 
 ```bash
 docker build -t url-shortener-api .
 ```
 
-Run the container:
+### Run with Docker Compose
 
 ```bash
-docker run -p 8080:8080 url-shortener-api
+docker compose up
+```
+
+Docker Compose starts the Spring Boot API and PostgreSQL database.
+
+To stop the containers:
+
+```bash
+docker compose down
+```
+
+To stop containers and remove the local database volume:
+
+```bash
+docker compose down -v
+```
+
+> `docker compose down -v` deletes the local PostgreSQL data volume.
+
+---
+
+## ▶️ Run Locally Without Docker
+
+### Prerequisites
+
+- Java 25+
+- Maven
+- PostgreSQL
+- Git
+
+Clone the repository:
+
+```bash
+git clone https://github.com/jayesh-pandharkar/url-shortener-api.git
+cd url-shortener-api
+```
+
+Build the project:
+
+```bash
+./mvnw clean package
+```
+
+Run the application:
+
+```bash
+./mvnw spring-boot:run
+```
+
+The application runs on:
+
+```text
+http://localhost:8080
 ```
 
 ---
 
-# 🗄️ Database
+## 📚 Swagger / OpenAPI
 
-The application uses PostgreSQL as its relational database.
+Interactive API documentation:
 
-Spring Data JPA and Hibernate are used for object-relational mapping.
+https://url-shortener-api-production-91e8.up.railway.app/swagger-ui/index.html
+
+Swagger allows API consumers to:
+
+- View available endpoints
+- Inspect request and response schemas
+- Understand authentication requirements
+- Execute API requests interactively
+
+---
+
+## 🧪 Testing
+
+The API was tested using:
+
+- Postman
+- Swagger UI
+- Local Spring Boot execution
+- Docker Compose
+- Production Railway deployment
+
+Typical verification flow:
 
 ```text
-Entity
+Register
    ↓
-Repository
+Login
    ↓
-Hibernate
+Receive JWT
    ↓
-JDBC
+Authorize protected endpoints
    ↓
+Create short URL
+   ↓
+Retrieve user's URLs
+   ↓
+Update / Delete URL
+   ↓
+Open short code
+   ↓
+Verify redirect and click count
+```
+
+---
+
+## ☁️ Deployment
+
+The application is deployed on Railway.
+
+```text
+Client
+  ↓
+Railway
+  ↓
+Spring Boot API
+  ↓
 PostgreSQL
 ```
 
-The application uses database persistence for:
-
-- Users
-- Short URLs
-- Original URLs
-- Short codes
-- Click counts
-- Creation timestamps
-- URL ownership
-
----
-
-# 🔒 Security
-
-The application uses Spring Security and JWT.
-
-### Spring Security
-
-Used to protect API endpoints and implement authentication/authorization.
-
-### JWT
-
-JWT tokens are issued after successful authentication.
-
-Protected requests use:
-
-```http
-Authorization: Bearer <JWT_TOKEN>
-```
-
-### Stateless Authentication
-
-The server does not rely on an HTTP session for API authentication.
-
----
-
-# 🌎 Production Deployment
-
-The backend has been deployed using Railway.
-
 Production URL:
 
-https://url-shortener-api-production-91e8.up.railway.app
-
-Deployment architecture:
-
-```text
-                  Internet
-                     |
-                     v
-             Railway Service
-                     |
-                     v
-              Spring Boot API
-                     |
-                     v
-                PostgreSQL
-```
-
-Production configuration uses environment variables for sensitive values such as:
-
-```text
-DATABASE_URL
-DATABASE_USERNAME
-DATABASE_PASSWORD
-JWT_SECRET
-JWT_EXPIRATION
-```
-
-Sensitive credentials are not committed to the repository.
+https://url-shortener-api-production-91e8.up.railway.app/
 
 ---
 
-# 🔧 Environment Variables
-
-For local or production environments, sensitive configuration should be provided through environment variables.
-
-Example:
-
-```text
-SPRING_DATASOURCE_URL
-SPRING_DATASOURCE_USERNAME
-SPRING_DATASOURCE_PASSWORD
-JWT_SECRET
-JWT_EXPIRATION
-```
-
-Actual secret values should never be committed to GitHub.
-
----
-
-# 📁 Project Structure
+## 📁 Project Structure
 
 ```text
 url-shortener/
@@ -806,7 +403,16 @@ url-shortener/
 ├── src/
 │   ├── main/
 │   │   ├── java/
-│   │   │   └── ...
+│   │   │   └── com/jay/urlshortener/
+│   │   │       ├── config/
+│   │   │       ├── controller/
+│   │   │       ├── dto/
+│   │   │       ├── entity/
+│   │   │       ├── exception/
+│   │   │       ├── repository/
+│   │   │       ├── security/
+│   │   │       ├── service/
+│   │   │       └── util/
 │   │   │
 │   │   └── resources/
 │   │       └── application.properties
@@ -817,140 +423,40 @@ url-shortener/
 ├── docker-compose.yml
 ├── .dockerignore
 ├── pom.xml
-├── mvnw
-├── mvnw.cmd
-└── README.md
+├── README.md
+└── url-shortener-architecture.mmd
 ```
-
-The Java source code follows a layered architecture with dedicated packages for controllers, services, repositories, security, validation, DTOs, entities, and supporting utilities.
 
 ---
 
-# 📈 Engineering Highlights
+## 🚀 Future Improvements
 
-This project demonstrates practical backend engineering skills including:
+Potential improvements for a larger-scale production deployment include:
 
-- Designing RESTful APIs with Spring Boot
-- Implementing layered architecture
-- Applying dependency injection
-- Building DTO-based request/response handling
-- Implementing JWT authentication
-- Configuring Spring Security
-- Using Spring Data JPA
-- Working with Hibernate ORM
-- Designing PostgreSQL persistence
-- Implementing URL ownership
-- Generating unique short codes
-- Implementing HTTP redirects
-- Tracking URL click counts
-- Handling API errors
-- Documenting APIs using OpenAPI
-- Testing APIs using Postman and Swagger
-- Containerizing applications using Docker
-- Running multi-container applications with Docker Compose
-- Managing environment-specific configuration
-- Deploying a backend application to Railway
-
----
-
-# 🎯 Key Backend Concepts Demonstrated
-
-## REST API Design
-
-The project follows standard HTTP semantics:
-
-```text
-POST    → Create
-GET     → Retrieve
-PUT     → Update
-DELETE  → Delete
-```
-
-## Separation of Concerns
-
-Business logic is separated from HTTP handling and persistence.
-
-```text
-Controller
-    ↓
-Service
-    ↓
-Repository
-    ↓
-Database
-```
-
-This makes the application easier to:
-
-- Test
-- Maintain
-- Extend
-- Debug
-
-## Stateless Authentication
-
-JWT allows clients to authenticate requests without maintaining traditional server-side HTTP sessions.
-
-## Database Persistence
-
-JPA/Hibernate handles object-relational mapping between Java entities and PostgreSQL tables.
-
-## Containerization
-
-Docker packages the application and its runtime environment into a reproducible container.
-
-Docker Compose is used to run the application and PostgreSQL together.
-
----
-
-# 🚀 Future Improvements
-
-Potential future enhancements include:
-
-- Redis caching for frequently accessed short URLs
+- Redis caching
 - Rate limiting
 - Custom aliases
-- URL expiration management
 - QR code generation
 - Analytics dashboard
-- Advanced click analytics
-- IP/device/referrer analytics
-- Refresh tokens
-- Role-based authorization
-- CI/CD with GitHub Actions
-- Custom production domain
+- Pagination
+- Database indexing optimization
 - Centralized logging
-- Application monitoring
-- Prometheus/Grafana metrics
+- Monitoring and metrics
+- CI/CD pipeline
+- Custom domain support
 
 ---
 
-# 📌 Project Status
-
-```text
-✅ REST API
-✅ JWT Authentication
-✅ PostgreSQL
-✅ Spring Data JPA
-✅ Hibernate
-✅ URL Shortening
-✅ URL Redirection
-✅ Click Tracking
-✅ CRUD Operations
-✅ Swagger/OpenAPI
-✅ Postman Testing
-✅ Docker
-✅ Docker Compose
-✅ Railway Deployment
-✅ Production API
-```
-
----
-
-# 👨‍💻 Author
+## 👨‍💻 Author
 
 **Jayesh Pandharkar**
 
 GitHub:
 
 https://github.com/jayesh-pandharkar
+
+---
+
+## 📄 License
+
+This project is intended as a portfolio and learning project.
