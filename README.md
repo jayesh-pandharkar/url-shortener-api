@@ -4,21 +4,6 @@ A production-oriented URL Shortener REST API built with **Java, Spring Boot, Spr
 
 The application allows authenticated users to create, manage, and track shortened URLs while providing public short-code redirection.
 
-## 🌐 Live Demo
-
-**Live API:**  
-https://url-shortener-api-production-91e8.up.railway.app/
-
-**Swagger UI:**  
-https://url-shortener-api-production-91e8.up.railway.app/swagger-ui/index.html
-
-**Example short URL:**  
-https://url-shortener-api-production-91e8.up.railway.app/BmdLTM
-
-> The root URL provides a small live landing page for the API. The actual application functionality is demonstrated through the REST endpoints and Swagger UI.
-
----
-
 ## ✨ Features
 
 - User registration and authentication
@@ -40,7 +25,6 @@ https://url-shortener-api-production-91e8.up.railway.app/BmdLTM
 - Swagger/OpenAPI API documentation
 - Docker containerization
 - Docker Compose setup for application + PostgreSQL
-- Production deployment on Railway
 
 ---
 
@@ -117,7 +101,6 @@ The Mermaid source is also available in:
 | Swagger / OpenAPI | API documentation |
 | Docker | Application containerization |
 | Docker Compose | Local multi-container environment |
-| Railway | Production deployment |
 | Postman | API testing |
 
 ---
@@ -173,10 +156,6 @@ Protected endpoint is accessed
 | DELETE | `/api/urls/{shortCode}` | Required | Delete a short URL |
 | GET | `/{shortCode}` | Public | Redirect to the original URL |
 
-For complete request/response schemas and interactive testing, use Swagger UI:
-
-https://url-shortener-api-production-91e8.up.railway.app/swagger-ui/index.html
-
 ---
 
 ## 🔄 How URL Shortening Works
@@ -197,7 +176,7 @@ Original:
 https://github.com
 
 Short:
-https://url-shortener-api-production-91e8.up.railway.app/BmdLTM
+http://localhost:8080/BmdLTM
 ```
 
 ---
@@ -328,9 +307,13 @@ http://localhost:8080
 
 ## 📚 Swagger / OpenAPI
 
-Interactive API documentation:
+The project includes Swagger/OpenAPI documentation for exploring and testing the REST API locally.
 
-https://url-shortener-api-production-91e8.up.railway.app/swagger-ui/index.html
+After starting the application, open:
+
+```text
+http://localhost:8080/swagger-ui/index.html
+```
 
 Swagger allows API consumers to:
 
@@ -349,7 +332,6 @@ The API was tested using:
 - Swagger UI
 - Local Spring Boot execution
 - Docker Compose
-- Production Railway deployment
 
 Typical verification flow:
 
@@ -375,23 +357,21 @@ Verify redirect and click count
 
 ---
 
-## ☁️ Deployment
+## 🚀 Local Deployment
 
-The application is deployed on Railway.
+The application is containerized using Docker and can be run locally with Docker Compose.
 
 ```text
 Client
   ↓
-Railway
-  ↓
 Spring Boot API
+  ↓
+JPA / Hibernate
   ↓
 PostgreSQL
 ```
 
-Production URL:
-
-https://url-shortener-api-production-91e8.up.railway.app/
+Docker Compose starts the Spring Boot application and PostgreSQL database together.
 
 ---
 
